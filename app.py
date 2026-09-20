@@ -3,16 +3,22 @@ Moodline — read the emotion in your words.
 
 Single-file Streamlit app for the BiGRU emotion classifier.
 Runs with:  streamlit run app.py
+
+Uses the Keras model on the PyTorch backend (no TensorFlow), so it
+installs and runs on any recent Python, including 3.14.
 """
 
-from pathlib import Path
-import pickle
+import os
+
+# Must be set before importing keras (no TensorFlow on Python 3.14).
+os.environ.setdefault("KERAS_BACKEND", "torch")
+
+import json
 import re
+from pathlib import Path
 
 import numpy as np
 import streamlit as st
-
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 from keras.models import load_model
 
 # ------------------------------------------------------------------
@@ -21,7 +27,7 @@ from keras.models import load_model
 BASE_DIR = Path(__file__).resolve().parent
 
 MODEL_PATH = BASE_DIR / "Artifacts" / "BiGRU_Model.keras"
-TOKENIZER_PATH = BASE_DIR / "Artifacts" / "tokenizer.pkl"
+TOKENIZER_PATH = BASE_DIR / "Artifacts" / "tokenizer.json"
 
 MAX_SEQUENCE_LENGTH = 50
 
@@ -58,28 +64,53 @@ def preprocess_text(text: str) -> str:
 
 
 # ------------------------------------------------------------------
+# Tokenizer (JSON snapshot of the training-time Keras legacy Tokenizer)
+# ------------------------------------------------------------------
+@st.cache_resource
+def load_tokenizer():
+    with open(TOKENIZER_PATH, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    return data
+
+
+def texts_to_sequences(data, text: str) -> list[int]:
+    """Replicates the Keras legacy Tokenizer (num_words + oov)."""
+    word_index = data["word_index"]
+    num_words = data["num_words"]
+    oov_index = word_index.get(data["oov_token"])
+
+    seq: list[int] = []
+    for word in text.split():
+        idx = word_index.get(word)
+        if idx is not None and idx < num_words:
+            seq.append(idx)
+        elif oov_index is not None:
+            seq.append(oov_index)
+    return seq
+
+
+def pad_post(seq: list[int], maxlen: int = MAX_SEQUENCE_LENGTH) -> np.ndarray:
+    arr = np.zeros((1, maxlen), dtype=np.int64)
+    n = min(len(seq), maxlen)
+    arr[0, :n] = seq[:n]
+    return arr
+
+
+# ------------------------------------------------------------------
 # Model loading (cached — loads once per session)
 # ------------------------------------------------------------------
 @st.cache_resource(show_spinner="Waking the model up…")
-def load_model_and_tokenizer():
-    model = load_model(MODEL_PATH)
-    with open(TOKENIZER_PATH, "rb") as file:
-        tokenizer = pickle.load(file)
-    return model, tokenizer
+def load_bi_gru_model():
+    return load_model(MODEL_PATH)
 
 
 # ------------------------------------------------------------------
 # Prediction
 # ------------------------------------------------------------------
-def predict(model, tokenizer, text: str) -> tuple[str, float, dict[str, float]]:
+def predict(model, tokenizer_data, text: str) -> tuple[str, float, dict[str, float]]:
     cleaned = preprocess_text(text)
-    sequences = tokenizer.texts_to_sequences([cleaned])
-    padded = pad_sequences(
-        sequences,
-        maxlen=MAX_SEQUENCE_LENGTH,
-        padding="post",
-        truncating="post",
-    )
+    padded = pad_post(texts_to_sequences(tokenizer_data, cleaned))
+
     probabilities = model.predict(padded, verbose=0)[0]
 
     top_index = int(np.argmax(probabilities))
@@ -214,7 +245,8 @@ st.markdown(
 
 with st.spinner("Waking the model up…"):
     try:
-        model, tokenizer = load_model_and_tokenizer()
+        tokenizer_data = load_tokenizer()
+        model = load_bi_gru_model()
         model_ready = True
     except Exception as exc:  # pragma: no cover - surfaced to the user
         model_ready = False
@@ -235,7 +267,7 @@ if analyze:
         st.warning("Write a sentence first, then read its mood.")
     else:
         try:
-            emotion, confidence, probabilities = predict(model, tokenizer, sentence)
+            emotion, confidence, probabilities = predict(model, tokenizer_data, sentence)
             color = EMOTION_COLORS.get(emotion, "#6c7a89")
 
             st.markdown(
