@@ -3,14 +3,10 @@ Moodline — read the emotion in your words.
 
 Single-file Streamlit app for the BiGRU emotion classifier.
 Runs with:  streamlit run app.py
-
-Uses the Keras model on the PyTorch backend (no TensorFlow), so it
-installs and runs on any recent Python, including 3.14.
 """
 
 import os
 
-# Must be set before importing keras (no TensorFlow on Python 3.14).
 os.environ.setdefault("KERAS_BACKEND", "torch")
 
 import json
@@ -53,7 +49,7 @@ EMOTION_COLORS = {
 
 
 # ------------------------------------------------------------------
-# Text preprocessing (must match training-time format)
+# Text preprocessing
 # ------------------------------------------------------------------
 def preprocess_text(text: str) -> str:
     text = text.lower()
@@ -63,9 +59,6 @@ def preprocess_text(text: str) -> str:
     return text
 
 
-# ------------------------------------------------------------------
-# Tokenizer (JSON snapshot of the training-time Keras legacy Tokenizer)
-# ------------------------------------------------------------------
 @st.cache_resource
 def load_tokenizer():
     with open(TOKENIZER_PATH, "r", encoding="utf-8") as file:
@@ -74,7 +67,6 @@ def load_tokenizer():
 
 
 def texts_to_sequences(data, text: str) -> list[int]:
-    """Replicates the Keras legacy Tokenizer (num_words + oov)."""
     word_index = data["word_index"]
     num_words = data["num_words"]
     oov_index = word_index.get(data["oov_token"])
@@ -96,17 +88,11 @@ def pad_post(seq: list[int], maxlen: int = MAX_SEQUENCE_LENGTH) -> np.ndarray:
     return arr
 
 
-# ------------------------------------------------------------------
-# Model loading (cached — loads once per session)
-# ------------------------------------------------------------------
 @st.cache_resource(show_spinner="Waking the model up…")
 def load_bi_gru_model():
     return load_model(MODEL_PATH)
 
 
-# ------------------------------------------------------------------
-# Prediction
-# ------------------------------------------------------------------
 def predict(model, tokenizer_data, text: str) -> tuple[str, float, dict[str, float]]:
     cleaned = preprocess_text(text)
     padded = pad_post(texts_to_sequences(tokenizer_data, cleaned))
@@ -126,7 +112,7 @@ def predict(model, tokenizer_data, text: str) -> tuple[str, float, dict[str, flo
 
 
 # ------------------------------------------------------------------
-# Theming
+# Theming & High-Contrast CSS
 # ------------------------------------------------------------------
 def inject_theme():
     st.markdown(
@@ -155,7 +141,7 @@ def inject_theme():
             -webkit-text-fill-color: transparent;
         }
         .mood-tag {
-            color: #9497a6;
+            color: #c4c7d6;
             font-size: 0.95rem;
             margin: 0.4rem 0 0 0;
             font-weight: 400;
@@ -192,19 +178,26 @@ def inject_theme():
             font-style: italic;
             font-size: 1rem;
         }
+        
+        /* High-contrast styling for text area and placeholders */
         div[data-testid="stTextArea"] textarea {
-            background: #16171f;
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.15);
+            background: #16171f !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255,255,255,0.25) !important;
             border-radius: 16px;
             font-size: 1.05rem;
             line-height: 1.6;
             padding: 1rem;
         }
-        div[data-testid="stTextArea"] textarea:focus {
-            border-color: #7b8c9e;
-            box-shadow: 0 0 12px rgba(123, 140, 158, 0.25);
+        div[data-testid="stTextArea"] textarea::placeholder {
+            color: #a4a8bc !important;
+            opacity: 1 !important;
         }
+        div[data-testid="stTextArea"] textarea:focus {
+            border-color: #7b8c9e !important;
+            box-shadow: 0 0 12px rgba(123, 140, 158, 0.3) !important;
+        }
+        
         .stButton > button {
             border-radius: 999px;
             padding: 0.7rem 1.8rem;
@@ -254,7 +247,7 @@ def render_breakdown(probabilities: dict[str, float], color: str) -> None:
 
 
 # ------------------------------------------------------------------
-# App
+# App Layout
 # ------------------------------------------------------------------
 st.set_page_config(
     page_title="Moodline — emotion detector",
@@ -264,7 +257,6 @@ st.set_page_config(
 
 inject_theme()
 
-# Professional Top Header Box
 st.markdown(
     """
     <div class="header-container">
@@ -280,7 +272,7 @@ with st.spinner("Waking the model up…"):
         tokenizer_data = load_tokenizer()
         model = load_bi_gru_model()
         model_ready = True
-    except Exception as exc:  # pragma: no cover - surfaced to the user
+    except Exception as exc:
         model_ready = False
         st.error(f"Could not load the model: {exc}")
 
@@ -316,5 +308,5 @@ if analyze:
 
             st.markdown("<br>", unsafe_allow_html=True)
             render_breakdown(probabilities, color)
-        except Exception as exc:  # pragma: no cover - surfaced to the user
+        except Exception as exc:
             st.error(f"Prediction failed: {exc}")
