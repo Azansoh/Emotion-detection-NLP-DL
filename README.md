@@ -98,24 +98,11 @@ Then open **http://127.0.0.1:8000** in your browser.
 
 ---
 
-## ☁️ Deployment on Streamlit Community Cloud
+## ☁️ Deployment
 
-> ⚠️ **Important:** You must choose **Python 3.11** when deploying. The default
-> build uses Python 3.14, which has no TensorFlow wheels — the install will
-> fail with `No matching distribution found for tensorflow-cpu`. (Community
-> Cloud ignores `runtime.txt`; the Python version is selected in the UI.)
+Deployed on [Streamlit](https://streamlit.io).
 
-1. Push this repository to a **public GitHub repository**.
-2. Go to [share.streamlit.io](https://share.streamlit.io) and click **Create app**.
-3. Select the repository and set the **Main file path** to `app.py`.
-4. Expand **Advanced settings** and select **Python 3.11**.
-5. Click **Deploy**.
-
-Streamlit Community Cloud will install the dependencies from `requirements.txt` and start the app automatically.
-
-> **Changing an existing app:** Deployed apps keep their original Python version,
-> so to switch from 3.14 to 3.11 you must **delete the app and redeploy** it,
-> choosing Python 3.11 in Advanced settings again.
+Live app: **[https://emotion-detection-nlp-dl-g6.streamlit.app/](https://emotion-detection-nlp-dl-g6.streamlit.app/)**
 
 ---
 
