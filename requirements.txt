@@ -4,4 +4,4 @@ uvicorn==0.30.6
 pydantic==2.9.2
 keras==3.15.1
 torch==2.14.0
-numpy<2.3
+numpy>=2.3
