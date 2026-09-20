@@ -139,67 +139,85 @@ def inject_theme():
         .mood-title {
             font-family: "Fraunces", Georgia, serif;
             font-weight: 600;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             letter-spacing: -0.01em;
             margin: 0;
+            background: linear-gradient(135deg, #ffffff 30%, #9497a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .mood-tag {
-            color: #9497a6;
-            font-size: 0.82rem;
-            margin: 0.15rem 0 2rem;
+            color: #b0b3c1;
+            font-size: 0.88rem;
+            margin: 0.2rem 0 2rem;
         }
         .emotion-card {
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
             border-radius: 24px;
-            padding: 2rem 2.5rem;
+            padding: 2.2rem 2.5rem;
             background: linear-gradient(180deg, #16171f, #1c1e29);
             text-align: center;
-            margin-top: 1.2rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 16px 32px -12px rgba(0,0,0,0.5);
         }
-        .emotion-emoji { font-size: 3rem; line-height: 1; }
+        .emotion-emoji { font-size: 3.2rem; line-height: 1; }
         .emotion-word {
             font-family: "Fraunces", Georgia, serif;
             font-style: italic;
             font-weight: 600;
-            font-size: 3rem;
-            margin: 0.25rem 0 0.1rem;
+            font-size: 3.2rem;
+            margin: 0.3rem 0 0.1rem;
         }
         .emotion-conf {
             font-family: monospace;
-            color: #9497a6;
-            font-size: 0.85rem;
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
         }
         .echoed {
-            margin-top: 1.2rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            color: #9497a6;
+            margin-top: 1.4rem;
+            padding-top: 1.1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #d0d2df;
             font-style: italic;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
         div[data-testid="stTextArea"] textarea {
-            background: rgba(0,0,0,0.18);
-            color: #f2f0ea;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            font-size: 1rem;
-            line-height: 1.55;
+            background: rgba(20,22,30,0.6);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            padding: 1rem;
         }
         div[data-testid="stTextArea"] textarea:focus {
-            border-color: #6c7a89;
+            border-color: #7b8c9e;
+            box-shadow: 0 0 12px rgba(123, 140, 158, 0.25);
         }
         .stButton > button {
             border-radius: 999px;
-            padding: 0.65rem 1.6rem;
+            padding: 0.7rem 1.8rem;
             font-weight: 600;
-            background: #f2f0ea;
+            background: linear-gradient(135deg, #f2f0ea 0%, #d8d5cd 100%);
             color: #0e0f14;
             border: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
         }
         .stButton > button:hover {
-            background: #6c7a89;
-            color: #fff;
-            border: none;
+            background: #ffffff;
+            color: #000000;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.15);
+        }
+        .breakdown-header {
+            font-family: "Fraunces", Georgia, serif;
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
         }
         </style>
         """,
@@ -208,19 +226,19 @@ def inject_theme():
 
 
 def render_breakdown(probabilities: dict[str, float], color: str) -> None:
-    st.markdown("#### Breakdown")
+    st.markdown('<p class="breakdown-header">Confidence Breakdown</p>', unsafe_allow_html=True)
     for label, value in sorted(probabilities.items(), key=lambda kv: kv[1], reverse=True):
         bar_html = (
-            f'<div style="display:flex;align-items:center;gap:0.75rem;'
-            f'margin-bottom:0.6rem;font-size:0.85rem;">'
-            f'<span style="min-width:7rem;color:#9497a6;">{EMOTION_EMOJIS[label]} {label.title()}</span>'
-            f'<div style="flex:1;height:8px;background:rgba(255,255,255,0.06);'
-            f'border-radius:999px;overflow:hidden;">'
+            f'<div style="display:flex;align-items:center;gap:0.85rem;'
+            f'margin-bottom:0.75rem;font-size:0.9rem;">'
+            f'<span style="min-width:7.5rem;color:#ffffff;font-weight:500;">{EMOTION_EMOJIS[label]} {label.title()}</span>'
+            f'<div style="flex:1;height:10px;background:rgba(255,255,255,0.08);'
+            f'border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);">'
             f'<div style="width:{value * 100:.1f}%;height:100%;background:{color};'
-            f'border-radius:999px;"></div>'
+            f'border-radius:999px;box-shadow: 0 0 8px {color};"></div>'
             f'</div>'
-            f'<span style="min-width:3.2rem;text-align:right;font-family:monospace;'
-            f'color:#5c5f6d;">{value * 100:.1f}%</span>'
+            f'<span style="min-width:3.8rem;text-align:right;font-family:monospace;'
+            f'color:#ffffff;font-weight:700;font-size:0.92rem;">{value * 100:.1f}%</span>'
             f'</div>'
         )
         st.markdown(bar_html, unsafe_allow_html=True)
@@ -272,7 +290,7 @@ if analyze:
 
             st.markdown(
                 f"""
-                <div class="emotion-card" style="box-shadow: 0 20px 40px -18px {color};">
+                <div class="emotion-card" style="box-shadow: 0 20px 45px -16px {color};">
                     <div class="emotion-emoji">{EMOTION_EMOJIS.get(emotion, "🙂")}</div>
                     <div class="emotion-word" style="color:{color};">{emotion.title()}</div>
                     <div class="emotion-conf">{confidence * 100:.1f}% confidence</div>
@@ -282,7 +300,7 @@ if analyze:
                 unsafe_allow_html=True,
             )
 
-            st.markdown("---")
+            st.markdown("<br>", unsafe_allow_html=True)
             render_breakdown(probabilities, color)
         except Exception as exc:  # pragma: no cover - surfaced to the user
             st.error(f"Prediction failed: {exc}")
