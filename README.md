@@ -1,18 +1,6 @@
----
-title: Emotion Detection Api
-emoji: 💻
-colorFrom: pink
-colorTo: indigo
-sdk: docker
-pinned: false
-license: mit
----
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
-
 # Deep Learning Emotion Detection Web Application
 
-An end-to-end Deep Learning project that classifies text into various emotional states (sadness, joy, love, anger, fear, and surprise) using sequential neural network architectures. The project compares **RNN**, **LSTM**, **GRU**, and **Bidirectional GRU (BiGRU)** models built with TensorFlow/Keras, and serves the best-performing model through a modern web UI powered by FastAPI.
+An end-to-end Deep Learning project that classifies text into various emotional states (sadness, joy, love, anger, fear, and surprise) using sequential neural network architectures. The project compares **RNN**, **LSTM**, **GRU**, and **Bidirectional GRU (BiGRU)** models built with TensorFlow/Keras, and serves the best-performing model through a Streamlit web app and a FastAPI backend.
 
 ---
 
@@ -20,17 +8,17 @@ An end-to-end Deep Learning project that classifies text into various emotional 
 
 * **Advanced Sequence Models**: Compares SimpleRNN, LSTM, GRU, and BiGRU performance metrics.
 * **Deep Learning Pipeline**: Incorporates text tokenization, padding, class-weight balancing, and `EarlyStopping` optimization.
+* **Streamlit UI**: Single-file interactive web app (`app.py`) for real-time inference.
 * **FastAPI Backend**: Robust API endpoints for text preprocessing and multi-class emotion prediction with probability breakdowns.
-* **Interactive Frontend**: A custom, clean web user interface (`index.html`, `style.css`, `script.js`) for real-time inference.
 * **Artifact Serialization**: Saves trained models (`.keras`) and tokenizers (`.pkl`) for seamless deployment.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Machine Learning / Deep Learning**: Python, TensorFlow, Keras, Scikit-Learn, NumPy, Pandas
+* **Machine Learning / Deep Learning**: Python, TensorFlow, Keras, NumPy, Pandas
+* **Web App**: Streamlit
 * **Backend**: FastAPI, Uvicorn, Pydantic
-* **Frontend**: HTML5, CSS3, JavaScript
 
 ---
 
@@ -44,14 +32,14 @@ An end-to-end Deep Learning project that classifies text into various emotional 
 │   └── tokenizer.pkl              # Fitted text tokenizer
 │
 ├── 📂 static
-│   ├── index.html                 # Frontend user interface
+│   ├── index.html                 # FastAPI frontend UI
 │   ├── style.css                  # UI styling
 │   └── script.js                  # Frontend logic & API fetch handling
 │
+├── app.py                         # Streamlit web application (single file)
 ├── Emotion_Detection.ipynb        # Colab notebook for EDA and model training
 ├── main.py                        # FastAPI application server
 ├── requirements.txt               # Python package dependencies
-├── runtime.txt                    # Deployment runtime configuration
 └── README.md                      # Project documentation
 ```
 
@@ -59,7 +47,7 @@ An end-to-end Deep Learning project that classifies text into various emotional 
 
 ## ✅ Prerequisites
 
-* **Python** 3.9 – 3.11 (the notebook was developed on Colab, so it is not required locally)
+* **Python** 3.11 (the notebook was developed on Colab, so it is not required locally)
 * **pip** (comes bundled with Python)
 
 ---
@@ -86,6 +74,16 @@ pip install -r requirements.txt
 
 ## 🚀 Running the Application
 
+### Streamlit Web App (recommended)
+
+```bash
+streamlit run app.py
+```
+
+Then open **http://localhost:8501** in your browser.
+
+### FastAPI Backend
+
 ```bash
 uvicorn main:app --reload
 ```
@@ -97,6 +95,17 @@ Then open **http://127.0.0.1:8000** in your browser.
 | `/`        | GET    | Serves the web UI |
 | `/health`  | GET    | Health check — confirms the model is loaded |
 | `/predict` | POST   | Predicts the emotion for input text |
+
+---
+
+## ☁️ Deployment on Streamlit Community Cloud
+
+1. Push this repository to a **public GitHub repository**.
+2. Go to [share.streamlit.io](https://share.streamlit.io) and click **Create app**.
+3. Select the repository and set the **Main file path** to `app.py`.
+4. Click **Deploy**.
+
+Streamlit Community Cloud will install the dependencies from `requirements.txt` and start the app automatically.
 
 ---
 
@@ -140,24 +149,14 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 ---
 
-## ☁️ Deployment
-
-The project is ready for platform-as-a-service deployment (e.g. **Render**, **Heroku**, **Railway**):
-
-* `runtime.txt` specifies the Python version (`python-3.11.9`).
-* `requirements.txt` holds all dependencies.
-* Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-
----
-
 ## ⚠️ Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
 | `ValueError: File not found: ... BiGRU_Model.keras` | The model file is missing or misnamed. Ensure `Artifacts/BiGRU_Model.keras` exists (exact spelling). |
 | `Unrecognized keyword arguments passed to Embedding: {'quantization_config': None}` | The model was saved with a newer Keras than installed. Load/save it with a matching Keras version, or strip the incompatible fields from `config.json` inside the `.keras` archive. |
+| `ModuleNotFoundError: No module named 'streamlit'` | Run `pip install -r requirements.txt` first, or `pip install streamlit`. |
 | `[Errno 10048] error while attempting to bind on address ... 8000` | Port already in use. Kill the stale process or run on another port: `uvicorn main:app --port 8001`. |
-| `model_loaded: false` at `/health` | The tokenizer or model failed to load at startup — check the server console logs. |
 
 ---
 
