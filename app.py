@@ -522,7 +522,7 @@ with st.spinner("Waking the model up…"):
 
 text = st.text_area(
     "**Enter your sentence below:**",
-    placeholder="Enter the text you want to analyze, e.g. “I can't believe we actually pulled this off.”",
+    placeholder="e.g. “I can't believe we actually pulled this off.”",
     height=130,
     max_chars=2000,
 )
