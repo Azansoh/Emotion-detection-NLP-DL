@@ -136,20 +136,29 @@ def inject_theme():
             background: #0e0f14;
             color: #f2f0ea;
         }
+        .header-container {
+            background: linear-gradient(135deg, #16171f 0%, #1c1e29 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 1.8rem 2.2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
+        }
         .mood-title {
             font-family: "Fraunces", Georgia, serif;
             font-weight: 600;
-            font-size: 1.6rem;
-            letter-spacing: -0.01em;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
             margin: 0;
-            background: linear-gradient(135deg, #ffffff 30%, #9497a6 100%);
+            background: linear-gradient(135deg, #ffffff 30%, #a4a7b6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .mood-tag {
-            color: #b0b3c1;
-            font-size: 0.88rem;
-            margin: 0.2rem 0 2rem;
+            color: #9497a6;
+            font-size: 0.95rem;
+            margin: 0.4rem 0 0 0;
+            font-weight: 400;
         }
         .emotion-card {
             border: 1px solid rgba(255,255,255,0.12);
@@ -158,7 +167,7 @@ def inject_theme():
             background: linear-gradient(180deg, #16171f, #1c1e29);
             text-align: center;
             margin-top: 1.5rem;
-            box-shadow: 0 16px 32px -12px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);
         }
         .emotion-emoji { font-size: 3.2rem; line-height: 1; }
         .emotion-word {
@@ -184,7 +193,7 @@ def inject_theme():
             font-size: 1rem;
         }
         div[data-testid="stTextArea"] textarea {
-            background: rgba(20,22,30,0.6);
+            background: #16171f;
             color: #ffffff;
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 16px;
@@ -215,7 +224,7 @@ def inject_theme():
         .breakdown-header {
             font-family: "Fraunces", Georgia, serif;
             color: #ffffff;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             margin-bottom: 1rem;
             letter-spacing: -0.01em;
         }
@@ -255,9 +264,14 @@ st.set_page_config(
 
 inject_theme()
 
-st.markdown('<p class="mood-title">✦ Moodline</p>', unsafe_allow_html=True)
+# Professional Top Header Box
 st.markdown(
-    '<p class="mood-tag">an instrument that reads the mood inside a sentence</p>',
+    """
+    <div class="header-container">
+        <p class="mood-title">✦ Moodline</p>
+        <p class="mood-tag">Deep Learning NLP Instrument That Reads the Hidden Emotion Inside Your Words</p>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -271,9 +285,9 @@ with st.spinner("Waking the model up…"):
         st.error(f"Could not load the model: {exc}")
 
 text = st.text_area(
-    "**Type a sentence and let it speak for itself — e.g. “I can't believe we actually pulled this off.”**",
-    placeholder="Write a sentence and let it speak for itself — e.g. “I can't believe we actually pulled this off.”",
-    height=140,
+    "**Enter your sentence below:**",
+    placeholder="e.g. “I can't believe we actually pulled this off.”",
+    height=130,
     max_chars=2000,
 )
 
@@ -290,7 +304,7 @@ if analyze:
 
             st.markdown(
                 f"""
-                <div class="emotion-card" style="box-shadow: 0 20px 45px -16px {color};">
+                <div class="emotion-card" style="box-shadow: 0 25px 50px -15px {color};">
                     <div class="emotion-emoji">{EMOTION_EMOJIS.get(emotion, "🙂")}</div>
                     <div class="emotion-word" style="color:{color};">{emotion.title()}</div>
                     <div class="emotion-conf">{confidence * 100:.1f}% confidence</div>
